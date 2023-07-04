@@ -1,10 +1,9 @@
-const { axios } = require("axios")
 const { comparePass } = require("../helpers/bcrypt")
 const { signToken } = require("../helpers/jwt")
-const { User, Bookmark } = require("../models")
+const { User } = require("../models")
 const { OAuth2Client } = require('google-auth-library')
 
-class Controller {
+class UserController {
   static async register(req, res, next) {
     try {
       const { username, email, password } = req.body
@@ -77,4 +76,5 @@ class Controller {
     }
   }
 }
-module.exports = Controller
+
+module.exports = UserController

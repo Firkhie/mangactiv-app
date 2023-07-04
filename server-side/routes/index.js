@@ -1,14 +1,15 @@
-const Controller = require('../controllers')
+const MangaController = require('../controllers/mangaController')
+const UserController = require('../controllers/userController')
 const { authentication } = require('../middlewares/auth')
 const router = require('express').Router()
 
-router.post('/register', Controller.register)
-router.post('/login', Controller.login)
-router.post('/google-login', Controller.googleLogin)
+router.post('/register', UserController.register)
+router.post('/login', UserController.login)
+router.post('/google-login', UserController.googleLogin)
 
-// router.get('/popularmangas', Controller.fetchMangas)
-// router.get('/updatedmangas', Controller.fetchMangas)
-// router.get('/allmangas/:pageId', Controller.fetchMangas)
+router.get('/popularmangas', MangaController.fetchMangas)
+router.get('/latestmangas', MangaController.fetchMangas)
+router.get('/mangas/:pageId', MangaController.fetchMangas)
 // router.get('/mangadetail/:id', Controller.fetchMangaDetail)
 // router.get('/readmanga/:chapterId/:pageId', Controller.fetchMangaPages)
 
