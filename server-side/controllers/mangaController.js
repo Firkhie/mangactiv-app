@@ -1,13 +1,41 @@
-const { default: axios } = require("axios")
+const { default: axios } = require("axios");
 
 class MangaController {
+  // Helper function untuk mengambil data author
+  static async fetchAuthor(authorId) {
+    const authorResponse = await axios.get(`https://api.mangadex.org/author/${authorId}`);
+    return authorResponse.data.data.attributes.name;
+  }
+
+  // Helper function untuk mengambil data cover manga
+  static async fetchCover(mangaId) {
+    const coverResponse = await axios.get(`https://api.mangadex.org/cover/${mangaId}`);
+    const coverFileName = coverResponse.data.data.attributes.fileName;
+    return `https://uploads.mangadex.org/covers/${mangaId}/${coverFileName}`;
+  }
+
+  // Helper function untuk mengambil data chapter
+  static async fetchChapters(mangaId) {
+    const mangaChapters = await axios.get(`https://api.mangadex.org/manga/${mangaId}/aggregate`);
+    const chapters = Object.keys(mangaChapters.data.volumes.none.chapters).map((chapterId) => {
+      const chapter = mangaChapters.data.volumes.none.chapters[chapterId];
+      return {
+        id: chapter.id,
+        chapter: chapter.chapter,
+        pageCount: chapter.count
+      };
+    });
+    return chapters;
+  }
+
+  // Fetch mangas
   static async fetchMangas(req, res, next) {
     try {
-      // Pengaturan apa saja manga yang akan diambil
       let limitPage;
       let offsetPage;
       let queryOfParams;
 
+      // Pengaturan apa saja manga yang akan diambil
       if (req.path === '/popularmangas') {
         limitPage = 2;
         offsetPage = 0;
@@ -21,7 +49,7 @@ class MangaController {
         queryOfParams = {
           'order[latestUploadedChapter]': 'desc',
         };
-      } else if (req.path.startsWith('/mangas/')) {
+      } else if (req.path.startsWith('/allmangas/')) {
         const { pageId } = req.params;
         const parsedPageId = parseInt(pageId);
 
@@ -53,21 +81,19 @@ class MangaController {
             // Pengambilan raw data manga dari ID yang di dapat
             const mangaResponse = await axios.get(`https://api.mangadex.org/manga/${mangaId}`);
             const mangaData = mangaResponse.data.data;
+
             // Pengambilan nama author
             const authorId = mangaData.relationships.find((relation) => relation.type === 'author').id;
-            const authorResponse = await axios.get(`https://api.mangadex.org/author/${authorId}`);
-            const authorName = authorResponse.data.data.attributes.name;
+            const authorName = await MangaController.fetchAuthor(authorId);
+
             // Pengambilan gambar cover manga
             const coverArtId = mangaData.relationships.find((relation) => relation.type === 'cover_art').id;
-            const coverResponse = await axios.get(`https://api.mangadex.org/cover/${coverArtId}`);
-            const coverFileName = coverResponse.data.data.attributes.fileName;
-            const coverUrl = `https://uploads.mangadex.org/covers/${mangaData.id}/${coverFileName}`;
+            const coverUrl = await MangaController.fetchCover(coverArtId);
+
             // Pengambilan latest chapter
-            const mangaChapters = await axios.get(`https://api.mangadex.org/manga/${mangaData.id}/aggregate`);
-            const latestVolumes = Object.values(mangaChapters.data.volumes);
-            const lastVolume = latestVolumes[latestVolumes.length - 1].volume;
-            const lastChapters = Object.keys(latestVolumes[latestVolumes.length - 1].chapters);
-            const lastChapter = lastChapters[lastChapters.length - 1];
+            const chapters = await MangaController.fetchChapters(mangaId);
+            const latestChapter = chapters[chapters.length - 1].chapter;
+
             // Hasil pengambilan data
             return {
               id: mangaData.id,
@@ -77,7 +103,7 @@ class MangaController {
               year: mangaData.attributes.year,
               tags: mangaData.attributes.tags.map((tag) => tag.attributes.name.en),
               coverArt: coverUrl,
-              latestChapter: lastChapter,
+              latestChapter: latestChapter,
               authorName: authorName,
             };
           } catch (err) {
@@ -88,12 +114,52 @@ class MangaController {
       );
 
       let responseObj = { mangaDataArray };
-      if (req.path.startsWith('/mangas/')) {
+
+      if (req.path.startsWith('/allmangas/')) {
         const nextPage = offsetPage / limitPage + 1;
         responseObj = { ...responseObj, nextPage };
       }
 
-      res.status(200).json(mangaDataArray);
+      res.status(200).json(responseObj);
+    } catch (err) {
+      console.log(err);
+      next(err);
+    }
+  }
+
+  // Fetch manga detail
+  static async fetchMangaDetail(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      // Cari manga sesuai ID
+      const manga = await axios({
+        url: `https://api.mangadex.org/manga/${id}`,
+        method: 'get',
+      });
+      const mangaData = manga.data.data;
+
+      // Pengambilan gambar cover manga
+      const coverArtId = mangaData.relationships.find((relation) => relation.type === 'cover_art').id;
+      const coverUrl = await MangaController.fetchCover(coverArtId);
+
+      // Pengambilan daftar chapter
+      const chapters = await MangaController.fetchChapters(id);
+      const totalChapters = chapters.length;
+
+      // Hasil pengambilan data
+      res.status(200).json({
+        id: mangaData.id,
+        name: mangaData.attributes.title.en,
+        description: mangaData.attributes.description.en,
+        status: mangaData.attributes.status,
+        year: mangaData.attributes.year,
+        tags: mangaData.attributes.tags.map((tag) => tag.attributes.name.en),
+        coverArt: coverUrl,
+        latestChapter: mangaData.attributes.latestUploadedChapter,
+        totalChapters: totalChapters,
+        chapters: chapters,
+      });
     } catch (err) {
       console.log(err);
       next(err);
@@ -101,4 +167,4 @@ class MangaController {
   }
 }
 
-module.exports = MangaController
+module.exports = MangaController;

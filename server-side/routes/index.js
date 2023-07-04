@@ -9,7 +9,7 @@ router.post('/google-login', UserController.googleLogin)
 
 router.get('/popularmangas', MangaController.fetchMangas)
 router.get('/latestmangas', MangaController.fetchMangas)
-router.get('/mangas/:pageId', MangaController.fetchMangas)
+router.get('/allmangas/:pageId', MangaController.fetchMangas)
 // router.get('/mangadetail/:id', Controller.fetchMangaDetail)
 // router.get('/readmanga/:chapterId/:pageId', Controller.fetchMangaPages)
 
