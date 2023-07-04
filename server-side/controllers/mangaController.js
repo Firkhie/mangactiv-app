@@ -165,6 +165,30 @@ class MangaController {
       next(err);
     }
   }
+
+  static async fetchMangaPages(req, res, next) {
+    try {
+      // Mendapatkan URL Images
+      const { chapterId, pageId } = req.params
+      const chapterImages = await axios({
+        url: `https://api.mangadex.org/at-home/server/${chapterId}`,
+        method: 'get'
+      })
+      let chapterImageUrl = `${chapterImages.data.baseUrl}/data/${chapterImages.data.chapter.hash}/${chapterImages.data.chapter.data[pageId]}`
+
+      // Mengubah URL menjadi response stream
+      const response = await axios({
+        method: 'GET',
+        url: chapterImageUrl,
+        responseType: 'stream',
+      });
+      res.setHeader('Content-Type', 'image/jpeg');
+      response.data.pipe(res);
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
+  }
 }
 
 module.exports = MangaController;
