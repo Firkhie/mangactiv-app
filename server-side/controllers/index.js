@@ -18,6 +18,7 @@ class Controller {
       next(err)
     }
   }
+
   static async login(req, res, next) {
     try {
       const { email, password } = req.body
@@ -36,6 +37,41 @@ class Controller {
       } else {
         throw { name: 'EmailPasswordInvalid' }
       }
+    } catch (err) {
+      next(err)
+    }
+  }
+
+  static async googleLogin(req, res, next) {
+    try {
+      const { google_token } = req.headers
+      const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+      const ticket = await client.verifyIdToken({
+        idToken: google_token,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+
+      const payload = ticket.getPayload();
+      let user = await User.findOne({
+        where: {
+          email: payload.email
+        }
+      })
+
+      const { given_name, email } = payload
+      if (!user) {
+        if (req.path === '/google-login') {
+          user = await User.create({ username: given_name, email, password: String(Math.random()), role: 'Staff' })
+        } else if (req.path === '/pub/google-login') {
+          user = await User.create({ username: given_name, email, password: String(Math.random()), role: 'Customer' })
+        }
+      }
+
+      const access_token = signToken({
+        id: user.id
+      })
+      res.status(200).json({ access_token, email, role: user.role, username: user.username })
     } catch (err) {
       next(err)
     }

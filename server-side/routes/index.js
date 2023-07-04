@@ -4,7 +4,7 @@ const router = require('express').Router()
 
 router.post('/register', Controller.register)
 router.post('/login', Controller.login)
-// router.post('/google-login', Controller.googleLogin)
+router.post('/google-login', Controller.googleLogin)
 
 // router.get('/popularmangas', Controller.fetchMangas)
 // router.get('/updatedmangas', Controller.fetchMangas)
