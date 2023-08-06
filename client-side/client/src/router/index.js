@@ -2,10 +2,11 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomePage from '../views/HomePage.vue'
 import LoginPage from '../views/LoginPage.vue'
 import RegisterPage from '../views/RegisterPage.vue'
-import MangasPage from '../views/MangasPage.vue'
-import DetailPage from '../views/DetailPage.vue'
-import LibraryPage from '../views/LibraryPage.vue'
-import ReadPage from '../views/ReadPage.vue'
+import AllMangasPage from '../views/AllMangasPage.vue'
+import MangaDetailPage from '../views/MangaDetailPage.vue'
+import ReadMangaPage from '../views/ReadMangaPage.vue'
+import MyLibraryPage from '../views/MyLibraryPage.vue'
+import DonationPage from '../views/DonationPage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,26 +27,41 @@ const router = createRouter({
       component: RegisterPage
     },
     {
-      path: '/mangas/:pageId',
-      name: 'mangas',
-      component: MangasPage
+      path: '/allmangas/:pageId',
+      name: 'allmangas',
+      component: AllMangasPage
     },
     {
-      path: '/detail/:id',
-      name: 'detail',
-      component: DetailPage
+      path: '/mangadetail/:id',
+      name: 'mangadetail',
+      component: MangaDetailPage
     },
     {
-      path: '/library',
-      name: 'library',
-      component: LibraryPage
+      path: '/readmanga/:chapterId/:pageId',
+      name: 'readmanga',
+      component: ReadMangaPage
     },
     {
-      path: '/read/:chapterId/:pageId',
-      name: 'read',
-      component: ReadPage
+      path: '/mylibrary',
+      name: 'mylibrary',
+      component: MyLibraryPage
+    },
+    {
+      path: '/donation',
+      name: 'donation',
+      component: DonationPage
     },
   ]
+})
+
+router.beforeEach((to, from, next) => {
+  let isAuthenticated = localStorage.getItem('access_token')
+  
+  if (!isAuthenticated && to.name == 'mylibrary') next('/')
+  if (isAuthenticated && to.name == 'login') next('/')
+  if (isAuthenticated && to.name == 'register') next('/')
+  // if (to.matched.length === 0) next(from.path)
+  next()
 })
 
 export default router

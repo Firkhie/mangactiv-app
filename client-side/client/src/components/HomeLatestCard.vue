@@ -1,106 +1,55 @@
 <template>
-  <div class="card">
-    <div class="left-card">
-      <img src="../assets/cover-1.jpg" alt="" />
+  <div class="box" v-for="updatedManga in updatedMangas" @click.prevent="mangaDetail(updatedManga.id)">
+    <div class="left">
+      <img v-bind:src="updatedManga.coverArt" alt="" />
     </div>
-    <div class="right-card">
-      <div class="genres">
-        <span>Comedy</span>
-        <span>Romance</span>
+    <div class="right">
+      <div class="manga-name">
+        <h4>{{ updatedManga.name }}</h4>
       </div>
-      <div class="title">
-        <h4>Damedol to Sekai ni Hitori Dake no Fan</h4>
+      <div class="manga-latest">
+        <p>Chapter {{ updatedManga.latestChapter }}</p>
       </div>
-      <p>Chapter 1</p>
-      <h5>Kirishimo</h5>
-    </div>
-  </div>
-  <div class="card">
-    <div class="left-card">
-      <img src="../assets/cover-1.jpg" alt="" />
-    </div>
-    <div class="right-card">
-      <div class="genres">
-        <span>Comedy</span>
-        <span>Romance</span>
+      <div class="manga-author">
+        <h5>{{ updatedManga.authorName }}</h5>
       </div>
-      <div class="title">
-        <h4>Damedol to Sekai ni Hitori Dake no Fan</h4>
-      </div>
-      <p>Chapter 1</p>
-      <h5>Kirishimo</h5>
-    </div>
-  </div>
-  <div class="card">
-    <div class="left-card">
-      <img src="../assets/cover-1.jpg" alt="" />
-    </div>
-    <div class="right-card">
-      <div class="genres">
-        <span>Comedy</span>
-        <span>Romance</span>
-      </div>
-      <div class="title">
-        <h4>Damedol to Sekai ni Hitori Dake no Fan</h4>
-      </div>
-      <p>Chapter 1</p>
-      <h5>Kirishimo</h5>
-    </div>
-  </div>
-  <div class="card">
-    <div class="left-card">
-      <img src="../assets/cover-1.jpg" alt="" />
-    </div>
-    <div class="right-card">
-      <div class="genres">
-        <span>Comedy</span>
-        <span>Romance</span>
-      </div>
-      <div class="title">
-        <h4>Damedol to Sekai ni Hitori Dake no Fan</h4>
-      </div>
-      <p>Chapter 1</p>
-      <h5>Kirishimo</h5>
-    </div>
-  </div>
-  <div class="card">
-    <div class="left-card">
-      <img src="../assets/cover-1.jpg" alt="" />
-    </div>
-    <div class="right-card">
-      <div class="genres">
-        <span>Comedy</span>
-        <span>Romance</span>
-      </div>
-      <div class="title">
-        <h4>Damedol to Sekai ni Hitori Dake no Fan</h4>
-      </div>
-      <p>Chapter 1</p>
-      <h5>Kirishimo</h5>
-    </div>
-  </div>
-  <div class="card">
-    <div class="left-card">
-      <img src="../assets/cover-1.jpg" alt="" />
-    </div>
-    <div class="right-card">
-      <div class="genres">
-        <span>Comedy</span>
-        <span>Romance</span>
-      </div>
-      <div class="title">
-        <h4>Damedol to Sekai ni Hitori Dake no Fan</h4>
-      </div>
-      <p>Chapter 1</p>
-      <h5>Kirishimo</h5>
     </div>
   </div>
 </template>
 
 <script>
+import { mapActions, mapState } from 'pinia';
+import { useCounterStore } from '../stores/counter';
+
 export default {
-  name: 'HomeLatestCard'
+  name: 'HomeLatestCard',
+  computed: {
+    ...mapState(useCounterStore, ['updatedMangas'])
+  },
+  methods: {
+    ...mapActions(useCounterStore, ['fetchUpdatedMangas']),
+    mangaDetail(id) {
+      this.$router.push(`/mangadetail/${id}`)
+    }
+  },
+  async created() {
+    await this.fetchUpdatedMangas()
+  }
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.right {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px 10px;
+}
+.manga-name {
+  max-height: 50px;
+  overflow: hidden;
+}
+.manga-author {
+  margin-bottom: 0.5rem;
+}
+</style>

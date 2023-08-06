@@ -1,66 +1,50 @@
 <template>
-  <div class="card">
-    <div class="left-card">
-      <img src="../assets/cover-1.jpg" alt="" />
+  <div class="box" v-for="popularManga in popularMangas" @click.prevent="mangaDetail(popularManga.id)">
+    <div class="left">
+      <img v-bind:src="popularManga.coverArt" alt="" />
     </div>
-    <div class="right-card">
-      <div class="right-card-content">
-        <div class="genres">
-          <span>Comedy</span>
-          <span>Romance</span>
-        </div>
-        <div class="title-desc">
-          <h4>Damedol to Sekai ni Hitori Dake no Fan</h4>
-          <p>
-            "Urumin" is an idol, but she can't sing or dance well, and she got a dishonest
-            character. Kimiya is the only fan in the world who likes her. The relationship between
-            the two of them is a little different from the usual relationships between idols and
-            fans! This is a "precious" love comedy that depicts the daily life of a bad idol and the
-            man who keeps on promoting her, and the way he loves her! "Urumin" is an idol, but she
-            can't sing or dance well, and she got a dishonest character. Kimiya is the only fan in
-            the world who likes her. The relationship between the two of them is a little different
-            from the usual relationships between idols and fans! This is a "precious" love comedy
-            that depicts the daily life of a bad idol and the man who keeps on promoting her, and
-            the way he loves her!
-          </p>
-        </div>
+    <div class="right">
+      <div class="genres">
+        <span>{{ popularManga.tags[0] }}</span>
+        <span>{{ popularManga.tags[1] }}</span>
+        <span>{{ popularManga.tags[2] }}</span>
       </div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="left-card">
-      <img src="../assets/cover-1.jpg" alt="" />
-    </div>
-    <div class="right-card">
-      <div class="right-card-content">
-        <div class="genres">
-          <span>Comedy</span>
-          <span>Romance</span>
-        </div>
-        <div class="title-desc">
-          <h4>Damedol to Sekai ni Hitori Dake no Fan</h4>
-          <p>
-            "Urumin" is an idol, but she can't sing or dance well, and she got a dishonest
-            character. Kimiya is the only fan in the world who likes her. The relationship between
-            the two of them is a little different from the usual relationships between idols and
-            fans! This is a "precious" love comedy that depicts the daily life of a bad idol and the
-            man who keeps on promoting her, and the way he loves her! "Urumin" is an idol, but she
-            can't sing or dance well, and she got a dishonest character. Kimiya is the only fan in
-            the world who likes her. The relationship between the two of them is a little different
-            from the usual relationships between idols and fans! This is a "precious" love comedy
-            that depicts the daily life of a bad idol and the man who keeps on promoting her, and
-            the way he loves her!
-          </p>
-        </div>
+      <div class="title">
+        <h4>{{ popularManga.name }}</h4>
+      </div>
+      <div class="description">
+        <h5>{{ popularManga.description }}</h5>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { mapActions, mapState } from 'pinia';
+import { useCounterStore } from '../stores/counter';
+
 export default {
-  name: 'HomePopularCard'
+  name: 'HomePopularCard',
+  computed: {
+    ...mapState(useCounterStore, ['popularMangas'])
+  },
+  methods: {
+    ...mapActions(useCounterStore, ['fetchPopularMangas', 'failLoadRefresh']),
+    mangaDetail(id) {
+      this.$router.push(`/mangadetail/${id}`)
+      this.failLoadRefresh()
+    }
+  },
+  async created() {
+    await this.fetchPopularMangas()
+  }
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.description {
+  margin-top: 10px;
+  height: 120px;
+  overflow: hidden;
+}
+</style> */
